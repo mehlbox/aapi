@@ -1,7 +1,19 @@
 #!/bin/bash
 recpath="/mnt/autorecord"
+. "$(dirname "$0")/rpi-cirrus-functions.sh"
 
-if [ $(cat /sys/class/gpio/gpio5/value) -eq 0 ]; then
+if [ ! -f /tmp/aapi.conf ] # setup driver
+then
+  touch /tmp/aapi.conf
+  # setup gpio
+  echo 5  > /sys/class/gpio/export
+  echo in > /sys/class/gpio/gpio5/direction
+  # setup audio connection
+  playback_to_spdif
+  record_from_spdif
+fi
+
+if [ $(cat /sys/class/gpio/gpio5/value) -eq 0 ]; then # start stop recording
   ps cax | grep arecord > /dev/null
   if [ $? -eq 1 ]; then
     folder=`date '+%Y-%m-%d_%a'`
