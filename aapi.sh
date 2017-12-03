@@ -1,5 +1,6 @@
 #!/bin/bash
 recpath="/mnt/autorecord"
+pattern="????-??-??_??"
 . "$(dirname "$0")/rpi-cirrus-functions.sh"
 
 if [ ! -f /tmp/aapi.conf ] # setup driver
@@ -28,4 +29,12 @@ else
   if [ $? -eq 0 ]; then
     killall arecord > /dev/null
   fi
+fi
+
+if [ $(date '+%H%M') -eq "0000" ] # delete old folder
+then
+  ls -dr /mnt/autorecord/$pattern | tail -n +14 | while read folder
+  do
+    rm -r $folder
+  done
 fi
