@@ -14,26 +14,36 @@ then
   record_from_spdif
 fi
 
-if [ $(cat /sys/class/gpio/gpio5/value) -eq 0 ]; then # start stop recording
+if [ $(cat /sys/class/gpio/gpio5/value) -eq 0 ]; then # check gpio (switch)
+  echo "mixing console is turned on"
   ps cax | grep arecord > /dev/null
   if [ $? -eq 1 ]; then
     folder=`date '+%Y-%m-%d_%a'`
     file="autorec_"`date '+%Y-%m-%d_%a_%H%M'`".wav"
-    if [ ! -d $recpath/$folder ]; then
+    if [ ! -d $recpath/$folder ]; then # create folder if required
+      echo "new folder will be created"
       mkdir $recpath/$folder
     fi
-    arecord -c 2 -f S16_LE -r 48000 --max-file-time=1800 -D hw:CARD=RPiCirrus,DEV=0 $recpath/$folder/$file
+    echo "recording will be started"
+    arecord -c 2 -f S16_LE -r 48000 --max-file-time=3600 -D hw:CARD=RPiCirrus,DEV=0 $recpath/$folder/$file # start recording
+  else
+    echo "recording is already in progress"
   fi
 else
+  echo "mixing console is turned off"
   ps cax | grep arecord > /dev/null
   if [ $? -eq 0 ]; then
-    killall arecord > /dev/null
+    echo "recording will be stopped"
+    killall arecord > /dev/null # stop recording
+  else
+    echo "recording is already stopped"
   fi
 fi
 
-if [ $(date '+%H%M') -eq "0000" ] # delete old folder
+if [ $(date '+%H%M') -eq "0000" ] # delete old folder at midnight
 then
-  ls -dr /mnt/autorecord/$pattern | tail -n +14 | while read folder
+  echo "old folder will be deleted"
+  ls -dr /mnt/autorecord/$pattern | tail -n +16 | while read folder
   do
     rm -r $folder
   done
