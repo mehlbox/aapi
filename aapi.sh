@@ -1,7 +1,6 @@
 #!/bin/bash
 recpath="/mnt/autorecord"
 pattern="????-??-??_??"
-. "$(dirname "$0")/rpi-cirrus-functions.sh"
 
 if [ ! -f /tmp/aapi.conf ] # setup driver
 then
@@ -10,8 +9,6 @@ then
   echo 5  > /sys/class/gpio/export
   echo in > /sys/class/gpio/gpio5/direction
   # setup audio connection
-  playback_to_spdif
-  record_from_spdif
 fi
 
 if [ $(cat /sys/class/gpio/gpio5/value) -eq 0 ]; then # check gpio (switch)
@@ -25,7 +22,7 @@ if [ $(cat /sys/class/gpio/gpio5/value) -eq 0 ]; then # check gpio (switch)
       mkdir $recpath/$folder
     fi
     echo "recording will be started"
-    arecord -c 2 -f S16_LE -r 48000 --max-file-time=3600 -D hw:CARD=RPiCirrus,DEV=0 $recpath/$folder/$file # start recording
+    arecord -c 2 -f S16_LE -r 48000 --max-file-time=3600 -D hw:CARD=sndrpihifiberry,DEV=0 $recpath/$folder/$file # start recording
   else
     echo "recording is already in progress"
   fi
