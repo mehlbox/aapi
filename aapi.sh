@@ -2,6 +2,12 @@
 recpath="/mnt/autorecord"
 pattern="????-??-??_???"
 
+if [ -z "$(ls -A $recpath)" ]; then
+  echo "mount folder..."
+  sleep 10
+  mount -a
+fi
+
 if [ ! -f /tmp/aapi.conf ] # setup driver
 then
   touch /tmp/aapi.conf
